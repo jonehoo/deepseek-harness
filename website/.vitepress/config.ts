@@ -205,13 +205,14 @@ const base = process.env.DOCS_BASE ?? '/'
 
 /** Site identity shared by the VitePress configuration and the llms.txt index. */
 const siteIdentity = {
-  title: 'DeepSeek Harness',
+  title: 'Agent Hub for OPC',
   description: '用于构建 Agent Harness 的插件化 SDK',
 }
 
 /**
- * The DeepSeek wordmark, inlined so its `currentColor` fills follow the active
- * theme. An `<img>` would freeze the mark at the colors the file declares.
+ * The brand mark, inlined so its markup sits directly in the nav-bar lockup
+ * beside the product name and release tag. It carries its own fixed brand
+ * colors rather than following the active theme.
  */
 const wordmark = readFileSync(resolve(import.meta.dirname, '../public/wordmark.svg'), 'utf8')
   .trim()
@@ -229,7 +230,8 @@ const wordmark = readFileSync(resolve(import.meta.dirname, '../public/wordmark.s
  */
 const siteStyle = `
 .dsh-lockup { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
-.dsh-wordmark { display: block; height: 22px; width: auto; color: var(--vp-c-text-1); }
+.dsh-wordmark { display: block; height: 22px; width: auto; }
+.dsh-name { font-size: 15px; font-weight: 600; color: var(--vp-c-text-1); white-space: nowrap; }
 .dsh-tag {
   display: inline-flex;
   align-items: center;
@@ -281,14 +283,14 @@ const scrollbarScript = `
 `
 
 /**
- * Navigation-bar title: the DeepSeek wordmark and the release-stage tag.
- * VitePress renders `siteTitle` as HTML.
+ * Navigation-bar title: the brand mark, the product name, and the
+ * release-stage tag. VitePress renders `siteTitle` as HTML.
  *
  * @param previewTag - Localized release-stage label.
  * @returns Markup placed beside the navigation-bar home link.
  */
 function siteTitle(previewTag: string): string {
-  return `<span class="dsh-lockup">${wordmark}<span class="dsh-tag">${previewTag}</span></span>`
+  return `<span class="dsh-lockup">${wordmark}<span class="dsh-name">${siteIdentity.title}</span><span class="dsh-tag">${previewTag}</span></span>`
 }
 
 export default withMermaid({

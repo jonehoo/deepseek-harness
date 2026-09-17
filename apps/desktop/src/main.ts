@@ -24,6 +24,9 @@ import { desktopErrorState } from './startup-error.ts'
 import { startupFailureDocument } from './startup-document.ts'
 
 const SCHEME = 'dsh-app'
+// Packaged builds show the icon electron-builder embedded in the exe/app
+// bundle; only development runs (no such bundle) need this set explicitly.
+const DEVELOPMENT_WINDOW_ICON = fileURLToPath(new URL('../build/icon.png', import.meta.url))
 let focusPrimaryWindow = (): void => {}
 type RecoveryAction = 'restart' | 'plugins' | 'reset'
 let profileRecoveryAvailable = (): boolean => false
@@ -98,6 +101,7 @@ function createWindow(preload: string, show = false): BrowserWindow {
     minWidth: 880,
     minHeight: 600,
     show,
+    ...(app.isPackaged ? {} : { icon: DEVELOPMENT_WINDOW_ICON }),
     webPreferences: {
       preload,
       nodeIntegration: false,

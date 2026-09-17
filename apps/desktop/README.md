@@ -1,4 +1,4 @@
-# DeepSeek Harness Desktop
+# Agent Hub for OPC Desktop
 
 English | [中文](README.zh.md)
 

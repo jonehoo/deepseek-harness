@@ -54,8 +54,9 @@ export function createElectronBuilderConfig(
   const buildPaths = desktopTargetBuildPaths(resolveDesktopBuildTarget(env, hostPlatform, hostArch))
   return {
     appId,
-    productName: 'DeepSeek Harness',
-    artifactName: 'deepseek-harness-${version}-${os}-${arch}.${ext}',
+    productName: 'Agent Hub for OPC',
+    artifactName: 'agent-hub-for-opc-${version}-${os}-${arch}.${ext}',
+    icon: fileURLToPath(new URL('./build/icon.png', import.meta.url)),
     directories: { output: unsigned ? join(buildPaths.root, 'unsigned-artifacts') : buildPaths.artifacts },
     asar: true,
     files: [
