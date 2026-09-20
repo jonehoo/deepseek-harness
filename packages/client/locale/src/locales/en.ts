@@ -30,7 +30,7 @@ export const en = {
   'collapse': 'Collapse',
   'expand': 'Expand',
   'back': 'Back',
-  'brand.localBuild': 'DSH Local Build',
+  'brand.localBuild': 'Agent Hub for OPC',
   'unknown': 'Unknown',
   'none': 'None',
   'truncated': 'Truncated',
