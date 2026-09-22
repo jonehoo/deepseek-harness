@@ -25,14 +25,32 @@ function packageVersion(path: string, subject: string): string {
   return manifest.version
 }
 
-function debugPort(name: string, fallback: number): number {
+import { createServer } from 'node:net'
+
+async function checkPortAvailable(port: number): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
+    const server = createServer()
+    server.unref()
+    server.once('error', () => resolve(false))
+    server.listen(port, '127.0.0.1', () => {
+      server.close(() => resolve(true))
+    })
+  })
+}
+
+async function debugPort(name: string, fallback: number): Promise<number> {
   const value = process.env[name]
-  if (value === undefined || value === '') return fallback
-  const port = Number(value)
-  if (!Number.isSafeInteger(port) || port < 1 || port > 65_535) {
-    throw new Error(`desktop development: ${name} must be an integer from 1 through 65535`)
+  if (value !== undefined && value !== '') {
+    const port = Number(value)
+    if (!Number.isSafeInteger(port) || port < 1 || port > 65_535) {
+      throw new Error(`desktop development: ${name} must be an integer from 1 through 65535`)
+    }
+    return port
   }
-  return port
+  for (let port = fallback; port < fallback + 100; port++) {
+    if (await checkPortAvailable(port)) return port
+  }
+  return fallback
 }
 
 async function run(command: string, args: readonly string[], cwd: string, environment = process.env): Promise<void> {
@@ -58,9 +76,9 @@ async function launchElectron(): Promise<void> {
   const require = createRequire(import.meta.url)
   const electron: unknown = require('electron')
   if (typeof electron !== 'string') throw new Error('desktop development: electron executable is unavailable')
-  const mainPort = debugPort('DSH_DESKTOP_MAIN_INSPECT_PORT', 9229)
-  const rendererPort = debugPort('DSH_DESKTOP_RENDERER_DEBUG_PORT', 9222)
-  const hostPort = debugPort('DSH_DESKTOP_HOST_INSPECT_PORT', 9230)
+  const mainPort = await debugPort('DSH_DESKTOP_MAIN_INSPECT_PORT', 19229)
+  const rendererPort = await debugPort('DSH_DESKTOP_RENDERER_DEBUG_PORT', 19222)
+  const hostPort = await debugPort('DSH_DESKTOP_HOST_INSPECT_PORT', 19230)
   const home = resolve(process.env.DSH_HOME ?? join(DEVELOPMENT_ROOT, 'home'))
   const userData = join(DEVELOPMENT_ROOT, 'electron-user-data')
   const environment: NodeJS.ProcessEnv = {

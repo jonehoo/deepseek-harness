@@ -28,6 +28,9 @@ if (location.protocol === `${SCHEME}:` && location.hostname === 'app') {
     ready: () => ipcRenderer.invoke(DESKTOP_IPC.boot) as Promise<unknown>,
     failed: (message: string) => ipcRenderer.invoke(DESKTOP_IPC.bootFailed, message) as Promise<void>,
   })
+  contextBridge.exposeInMainWorld('dshAmbientLlm', {
+    getConfig: () => ipcRenderer.invoke(DESKTOP_IPC.ambientLlm) as Promise<unknown>,
+  })
 }
 
 markDocumentPlatform()

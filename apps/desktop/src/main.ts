@@ -1,9 +1,12 @@
 import { WINDOWS_TITLEBAR_HEIGHT } from './windows-layout.ts'
 /** Electron shell: desktop project ownership, custom protocol, windows, and lifecycle. */
 
+import { existsSync, readFileSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { load as parseYaml } from 'js-yaml'
+import { resolveDshHome } from '@deepseek-ai/dsh-home-paths'
 import {
   app,
   BrowserWindow,
@@ -429,6 +432,64 @@ async function main(): Promise<void> {
     }
     if (typeof message !== 'string') throw new Error('dsh desktop: startup failure must be text')
     reportFatal(new Error(message))
+  })
+
+  ipcMain.handle(DESKTOP_IPC.ambientLlm, () => {
+    try {
+      const dshHome = resolveDshHome()
+      let credentialsRefs: Record<string, string> = {}
+      let settingsData: Record<string, unknown> = {}
+
+      const credPath = join(dshHome, '.credentials.yaml')
+      if (existsSync(credPath)) {
+        const parsed = parseYaml(readFileSync(credPath, 'utf8'))
+        if (parsed !== null && typeof parsed === 'object' && 'refs' in parsed && parsed.refs && typeof parsed.refs === 'object') {
+          credentialsRefs = parsed.refs as Record<string, string>
+        }
+      }
+
+      const settingsPath = join(dshHome, 'settings.yaml')
+      if (existsSync(settingsPath)) {
+        const parsed = parseYaml(readFileSync(settingsPath, 'utf8'))
+        if (parsed !== null && typeof parsed === 'object') {
+          settingsData = parsed as Record<string, unknown>
+        }
+      }
+
+      const defaultModel = (settingsData['agent-default-model'] && typeof settingsData['agent-default-model'] === 'object'
+        ? settingsData['agent-default-model'] : {}) as Record<string, string>
+      const provider = defaultModel.provider || 'deepseek-official'
+      let model = defaultModel.model || 'deepseek-chat'
+      let baseURL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com'
+      let apiKey = credentialsRefs.DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY || ''
+
+      const llmPiAi = settingsData['llm-pi-ai'] as { providers?: Record<string, { baseURL?: string; models?: Array<{ id?: string }>; apiKeyEnv?: string }> } | undefined
+      if (provider !== 'deepseek-official' && llmPiAi?.providers?.[provider]) {
+        const custom = llmPiAi.providers[provider]
+        if (custom.baseURL) baseURL = custom.baseURL
+        if (custom.models?.[0]?.id) model = custom.models[0].id
+        if (custom.apiKeyEnv && credentialsRefs[custom.apiKeyEnv]) {
+          apiKey = credentialsRefs[custom.apiKeyEnv] ?? ''
+        }
+      }
+
+      return {
+        configured: Boolean(apiKey && apiKey.trim().length > 0),
+        provider,
+        model,
+        baseURL,
+        apiKey: apiKey.trim(),
+      }
+    } catch (error) {
+      console.warn('dsh desktop: failed to resolve ambient LLM config', error)
+      return {
+        configured: false,
+        provider: 'none',
+        model: 'deepseek-chat',
+        baseURL: 'https://api.deepseek.com',
+        apiKey: '',
+      }
+    }
   })
 
   session.defaultSession.webRequest.onBeforeSendHeaders({ urls: ['ws://127.0.0.1/*'] }, (details, callback) => {

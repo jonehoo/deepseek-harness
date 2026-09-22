@@ -22,6 +22,7 @@ import type {
 import { computeColumns, RIGHTBAR_DEFAULT_RATIO, SIDEBAR_AUTO_COLLAPSE, SIDEBAR_COLLAPSED, SIDEBAR_DEFAULT } from './columns.ts'
 import { DocumentTitle } from './DocumentTitle.tsx'
 import type { createLayoutStore } from './stores.ts'
+import { OpcPortalShell } from './portal/OpcPortalShell.tsx'
 import css from './AppFrame.module.css'
 
 /** Full composed props: runtime share + child-slot render share + store share. */
@@ -202,6 +203,45 @@ export function AppFrame({
   ), [usePanelInfo, renderSlot])
   const overlays = useMemo(() => renderSlot('shell.overlay', {}), [renderSlot])
 
+  const [activeWorker, setActiveWorker] = useState<import('./portal/digitalWorkers.ts').DigitalWorker | null>(null)
+  const [bridgeNotice, setBridgeNotice] = useState<string | null>(null)
+
+  const [appMode, setAppModeState] = useState<'portal' | 'dsh'>(() => {
+    try {
+      return (sessionStorage.getItem('dsh_app_mode') as 'portal' | 'dsh' | null) ?? 'portal'
+    } catch {
+      return 'portal'
+    }
+  })
+  const setAppMode = useCallback((mode: 'portal' | 'dsh') => {
+    try {
+      sessionStorage.setItem('dsh_app_mode', mode)
+    } catch {}
+    setAppModeState(mode)
+  }, [])
+
+  const handleOpenDsh = useCallback((
+    worker?: import('./portal/digitalWorkers.ts').DigitalWorker,
+    taskSpec?: string,
+  ) => {
+    if (worker) {
+      setActiveWorker(worker)
+      setBridgeNotice(`已激活【${worker.name}】专属协同域`)
+    } else if (taskSpec) {
+      setActiveWorker(null)
+      void navigator.clipboard.writeText(taskSpec).catch(() => {})
+      setBridgeNotice('✓ 已将 PM 蓝图规约复制至剪贴板，可直接在下方输入框 Ctrl+V 发送！')
+    } else {
+      setActiveWorker(null)
+      setBridgeNotice(null)
+    }
+    setAppMode('dsh')
+  }, [setAppMode])
+
+  if (appMode === 'portal') {
+    return <OpcPortalShell onOpenDsh={handleOpenDsh} />
+  }
+
   return (
     <div
       ref={frameRef}
@@ -227,7 +267,62 @@ export function AppFrame({
         {sidebar}
       </div>
       <>
-        <CenterColumn>{main}</CenterColumn>
+        <CenterColumn>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '6px 16px',
+            background: '#eff6ff',
+            borderBottom: '1px solid #bfdbfe',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: '#1e40af',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>OPC 指挥中枢 · 底座会话</span>
+              {activeWorker && (
+                <span style={{
+                  padding: '2px 8px',
+                  background: '#dbeafe',
+                  color: '#1d4ed8',
+                  borderRadius: '4px',
+                  fontWeight: 700,
+                }}>
+                  👨‍💼 正在与【{activeWorker.name} · {activeWorker.roleTitle}】协同
+                </span>
+              )}
+              {bridgeNotice && !activeWorker && (
+                <span style={{
+                  padding: '2px 8px',
+                  background: '#dcfce7',
+                  color: '#15803d',
+                  borderRadius: '4px',
+                  fontWeight: 600,
+                }}>
+                  {bridgeNotice}
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => { setAppMode('portal') }}
+              style={{
+                padding: '4px 12px',
+                background: '#2563eb',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '11px',
+                fontWeight: 700,
+              }}
+            >
+              ← 返回数字员工指挥工作台
+            </button>
+          </div>
+          {main}
+        </CenterColumn>
         <RightbarColumn>
           {renderSlot('rightbar', { width: normal.rightbar, viewportWidth: viewport, canShow: normal.rightbar > 0 })}
         </RightbarColumn>

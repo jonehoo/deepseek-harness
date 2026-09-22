@@ -166,6 +166,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
     return tabs
   }
   const activateView = (sessionId: SessionId, preferred: string | null): void => {
+    if (sessions.binding(sessionId) === undefined) return
     const active = resolveActiveView(viewTabs(), preferred)
     if (active !== undefined) uiConversation.binding(sessionId).activate(active.id)
   }

@@ -13,7 +13,17 @@ export const DESKTOP_IPC = {
   nativeThemeSet: 'dsh-desktop:native-theme-set',
   windowsAppearance: 'dsh-desktop:windows-appearance',
   windowsMenu: 'dsh-desktop:windows-menu',
+  ambientLlm: 'dsh-desktop:ambient-llm',
 } as const
+
+/** Ambient LLM configuration resolved from the DSH base environment. */
+export interface AmbientLlmConfig {
+  readonly configured: boolean
+  readonly provider: string
+  readonly model: string
+  readonly baseURL: string
+  readonly apiKey: string
+}
 
 /** Desktop release update state rendered by desktop-owned UI. */
 export type DesktopUpdatePreparationFailureKind = 'stop-failed' | 'tasks-changed' | 'tasks-unavailable'
