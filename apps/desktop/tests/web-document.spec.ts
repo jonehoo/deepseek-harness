@@ -61,3 +61,13 @@ it('refuses another page origin without forwarding its request', async () => {
   expect(response.status).toBe(403)
   expect(fetch).not.toHaveBeenCalled()
 })
+
+it('serves shell documents such as update-dialog without injecting boot resolvers', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'desktop-shell-'))
+  roots.push(root)
+  await writeFile(join(root, 'update-dialog.html'), '<html><head></head><body>dialog</body></html>')
+  const response = await serveWebDocument(new Request('dsh-app://shell/update-dialog.html'), root)
+  const html = await response.text()
+  expect(html).toBe('<html><head></head><body>dialog</body></html>')
+  expect(response.headers.get('content-type')).toBe('text/html; charset=utf-8')
+})

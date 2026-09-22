@@ -86,6 +86,7 @@ export class DesktopUpdateDialog {
       window.once('closed', abort)
       window.webContents.on('will-navigate', (event, url) => { if (url !== page) event.preventDefault() })
       window.webContents.once('render-process-gone', abort)
+      window.webContents.once('did-fail-load', abort)
       void window.loadURL(page).catch(abort)
     })
   }

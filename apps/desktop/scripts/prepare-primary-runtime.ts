@@ -139,10 +139,10 @@ export async function preparePrimaryRuntime(options: { deferSmoke?: boolean } = 
     }
     writeFileSync(join(output, 'runtime.json'), `${JSON.stringify(manifest, undefined, 2)}\n`)
     const destination = join(paths.runtime, 'primary-runtime')
-    rmSync(destination, { recursive: true, force: true })
+    rmSync(destination, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 })
     await cp(output, destination, { recursive: true, dereference: true })
   } finally {
-    rmSync(staging, { recursive: true, force: true })
+    rmSync(staging, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 })
   }
   const hostRequire = createRequire(resolve(import.meta.dirname, '..', '..', 'desktop-host', 'package.json'))
   await prepareOfficeSkillAssets(join(dirname(hostRequire.resolve('@deepseek-ai/dsh-skill-office/package.json')), 'assets'),

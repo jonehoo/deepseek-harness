@@ -407,6 +407,9 @@ async function main(): Promise<void> {
       }
       return forwardWebRequest(request, hostUrl, hostCookie)
     }
+    if (url.hostname === 'shell') {
+      return serveWebDocument(request, join(app.getAppPath(), 'renderer'))
+    }
     return Promise.resolve(new Response(null, { status: 404 }))
   })
 
