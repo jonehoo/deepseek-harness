@@ -12,7 +12,7 @@ export interface DigitalWorker {
   userDescription: string
   callExample: string
   capabilityLayers: CapabilityLayer[]
-  mode: 'pm-studio' | 'chat'
+  mode: 'pm-studio' | 'trainer-studio' | 'chat'
   systemPrompt?: string
 }
 
@@ -50,17 +50,17 @@ export const DIGITAL_WORKERS: DigitalWorker[] = [
   {
     id: 'opc-trainer',
     name: 'OPC 流程合规培训师',
-    roleTitle: '课件架构、内容生产与排期交付',
+    roleTitle: '8阶标准化课件流水线 · 讲义/大纲/PPT/题库/质检',
     avatar: '/employee-avatars/pro-training.png',
     avatarTone: 'linear-gradient(145deg, #059669, #047857)',
-    userDescription: '负责将业务需求转化为标准课件与培训计划，自动生成内容与排期，提升培训交付效率。',
-    callExample: '让培训策划专员把Q3课件排期跑出来',
+    userDescription: '基于企业知识库与业务规约，通过 T1~T8 八阶工序自动推演标准培训课件：需求提纲、教学讲义、考核题库、结构大纲、逐页策划、视觉分镜、交互课件与合规质检。',
+    callExample: '针对工控网络安全规约，生成一份实操认证培训课件流水线',
     capabilityLayers: [
-      { level: 'L1', items: ['课件排版', '大纲生成', '签到统计'] },
-      { level: 'L2', items: ['培训缺口诊断', '学习路径定制'] },
-      { level: 'L3', items: ['出题阅卷', '效果复盘报告'] },
+      { level: 'L1', items: ['T1 提纲简报', 'T2 教学讲义', 'T3 考核题库'] },
+      { level: 'L2', items: ['T4 8维大纲', 'T5 逐页策划', 'T6 视觉分镜'] },
+      { level: 'L3', items: ['T7 交互课件', 'T8 合规质检', '一键导出排期'] },
     ],
-    mode: 'chat',
+    mode: 'trainer-studio',
   },
   {
     id: 'sales-analyst',

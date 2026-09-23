@@ -1,5 +1,19 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { MarkdownText, type MarkdownLabels } from '@deepseek-ai/dsh-client-ui-primitives'
+import {
+  MarkdownText,
+  type MarkdownLabels,
+  IconSettingsOutline14,
+  IconPaperPlaneOutline14,
+  IconDownloadOutline16,
+  IconChevronLeftOutline14,
+  IconPlayOutline16,
+  IconStopFill16,
+  IconRefreshOutline14,
+  IconBrowseOutline16,
+  IconEditOutline16,
+  IconCopyOutline16,
+  IconCheckOutline14,
+} from '@deepseek-ai/dsh-client-ui-primitives'
 import { STEPS_CONFIG, generateStepOutput, getStepPrompts } from './pmPrompts.ts'
 import {
   type BlueprintProject,
@@ -7,16 +21,11 @@ import {
   exportFullBlueprintMarkdown,
 } from './projectStorage.ts'
 import {
-  getLlmConfig,
-  saveLlmConfig,
+  type EffectiveLlmConfig,
   streamChatCompletion,
   resolveEffectiveLlmConfig,
-  getAmbientLlm,
-  clearCustomLlmConfig,
-  type LlmConfig,
-  type EffectiveLlmConfig,
-  type AmbientDshLlm,
 } from './llmClient.ts'
+import { LlmSettingsModal } from './LlmSettingsModal.tsx'
 import css from './PmStudioWorkspace.module.css'
 
 const DEFAULT_MD_LABELS: MarkdownLabels = {
@@ -50,21 +59,15 @@ export function PmStudioWorkspace({
   const [showToast, setShowToast] = useState<string | null>(null)
 
   // LLM Configuration Modal State
-  const [llmConfig, setLlmConfig] = useState<LlmConfig>(getLlmConfig())
   const [effectiveLlm, setEffectiveLlm] = useState<EffectiveLlmConfig | null>(null)
-  const [ambientLlm, setAmbientLlm] = useState<AmbientDshLlm | null>(null)
   const [showLlmModal, setShowLlmModal] = useState<boolean>(false)
-  const [modalApiKey, setModalApiKey] = useState<string>('')
-  const [modalBaseUrl, setModalBaseUrl] = useState<string>('')
-  const [modalModel, setModalModel] = useState<string>('')
 
   const stopPipelineRef = useRef<boolean>(false)
   const abortControllerRef = useRef<AbortController | null>(null)
 
-  // Initialize ambient and effective LLM on mount
+  // Initialize effective LLM on mount
   useEffect(() => {
     void resolveEffectiveLlmConfig().then(setEffectiveLlm)
-    void getAmbientLlm().then(setAmbientLlm)
   }, [])
 
   // Auto-sync state when project prop changes
@@ -94,7 +97,7 @@ export function PmStudioWorkspace({
     const updated = getCurrentSnapshot()
     saveStoredProject(updated)
     onSaveProject?.(updated)
-    notifyToast('✓ 蓝图规格已保存至本地工作区')
+    notifyToast('蓝图规格已保存至本地工作区')
   }, [getCurrentSnapshot, onSaveProject])
 
   const handleCopy = useCallback(() => {
@@ -116,43 +119,11 @@ export function PmStudioWorkspace({
     a.download = `${current.name}_11步完整规约.md`
     a.click()
     URL.revokeObjectURL(url)
-    notifyToast('✓ 已导出完整 11 步 Markdown 规约全书')
+    notifyToast('已导出完整 11 步 Markdown 规约全书')
   }
 
-  const openLlmModal = async () => {
-    const ambient = await getAmbientLlm(true)
-    setAmbientLlm(ambient)
-    const effective = await resolveEffectiveLlmConfig()
-    setEffectiveLlm(effective)
-    const cfg = getLlmConfig()
-    setModalApiKey(cfg.apiKey)
-    setModalBaseUrl(cfg.baseURL)
-    setModalModel(cfg.model)
+  const openLlmModal = () => {
     setShowLlmModal(true)
-  }
-
-  const handleRestoreBaseModel = async () => {
-    clearCustomLlmConfig()
-    setModalApiKey('')
-    const effective = await resolveEffectiveLlmConfig()
-    setEffectiveLlm(effective)
-    setLlmConfig(effective)
-    notifyToast('✓ 已恢复免配置模式，直接复用 DSH 底座大模型')
-  }
-
-  const handleSaveLlmConfig = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const updated: LlmConfig = {
-      apiKey: modalApiKey.trim(),
-      baseURL: modalBaseUrl.trim() || 'https://api.deepseek.com',
-      model: modalModel.trim() || 'deepseek-chat',
-    }
-    saveLlmConfig(updated)
-    setLlmConfig(updated)
-    const effective = await resolveEffectiveLlmConfig()
-    setEffectiveLlm(effective)
-    setShowLlmModal(false)
-    notifyToast(updated.apiKey ? '✓ 自定义模型配置已生效' : '✓ 已恢复使用底座或本地保底模式')
   }
 
   // Orchestrate single step (tries LLM first, falls back to high-fidelity template)
@@ -178,7 +149,7 @@ export function PmStudioWorkspace({
           abortCtrl.signal,
         )
         usedLlm = true
-        notifyToast(`✓ 已由大模型 (${effective.model} · ${effective.source === 'base' ? 'DSH底座直连' : '自定义'}) 完成第 ${stepId} 步推演`)
+        notifyToast(`已由大模型 (${effective.model} · ${effective.source === 'base' ? 'DSH底座直连' : '自定义'}) 完成第 ${stepId} 步推演`)
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err)
         console.warn('LLM stream failed, falling back to local template:', message)
@@ -195,7 +166,7 @@ export function PmStudioWorkspace({
         isRagEnabled ? selectedKb : 'none',
       )
       setStepResults(prev => ({ ...prev, [stepId.toString()]: output }))
-      notifyToast(`✓ 已完成第 ${stepId} 步规约推演 (本地高保真引擎)`)
+      notifyToast(`已完成第 ${stepId} 步规约推演 (本地高保真引擎)`)
     }
 
     setRunningStepId(null)
@@ -268,7 +239,7 @@ export function PmStudioWorkspace({
     }
     saveStoredProject(updated)
     onSaveProject?.(updated)
-    notifyToast('🎉 11步企业级规约流水线已全部推演完成！')
+    notifyToast('11 步企业级规约流水线已全部推演完成！')
   }, [stepResults, promptText, isRagEnabled, selectedKb, project, onSaveProject])
 
   const handleStopPipeline = () => {
@@ -308,20 +279,28 @@ export function PmStudioWorkspace({
             onClick={openLlmModal}
             title={isBaseConnected ? '已自动接入 DSH 底座大模型，点击查看详情' : '点击配置大模型 API Key / Base URL'}
           >
-            <span>{isBaseConnected ? '🟢 DSH底座直连' : (isCustomConnected ? '🔵 自定义大模型' : '⚪ 本地高保真')}</span>
-            <span style={{ textDecoration: 'underline', fontSize: '10px' }}>
+            <span
+              className={css.llmStatusDot}
+              data-status={isBaseConnected ? 'base' : (isCustomConnected ? 'custom' : 'local')}
+            />
+            <span>{isBaseConnected ? 'DSH底座直连' : (isCustomConnected ? '自定义大模型' : '本地高保真')}</span>
+            <span style={{ fontSize: '10px', opacity: 0.85 }}>
               ({effectiveLlm?.model || 'deepseek-flash'})
             </span>
           </button>
         </div>
 
         <div className={css.topActions}>
-          <span className={css.autoSaveTag}>● 自动保存已启用</span>
+          <span className={css.autoSaveTag}>
+            <span className={css.autoSaveDot} />
+            <span>自动保存已启用</span>
+          </span>
           <button type="button" className={css.navButton} onClick={openLlmModal}>
-            ⚙️ 模型配置
+            <IconSettingsOutline14 size={13} />
+            <span>模型配置</span>
           </button>
           <button type="button" className={css.navButton} onClick={handleManualSave}>
-            保存
+            <span>保存</span>
           </button>
           <button
             type="button"
@@ -329,17 +308,20 @@ export function PmStudioWorkspace({
             onClick={handleSendToDsh}
             title="将当前规约无缝注入 DSH 底座让 Coding Agent 开始执行"
           >
-            🚀 发给底座落地
+            <IconPaperPlaneOutline14 size={13} />
+            <span>发给底座落地</span>
           </button>
           <button
             type="button"
             className={`${css.navButton} ${css.navButtonPrimary}`}
             onClick={handleExport}
           >
-            打包导出蓝图
+            <IconDownloadOutline16 size={13} />
+            <span>打包导出蓝图</span>
           </button>
           <button type="button" className={css.navButton} onClick={onClose}>
-            返回首页
+            <IconChevronLeftOutline14 size={13} />
+            <span>返回首页</span>
           </button>
         </div>
       </header>
@@ -415,7 +397,17 @@ export function PmStudioWorkspace({
               disabled={runningStepId !== null}
               onClick={pipelineRunning ? handleStopPipeline : handleRunPipeline}
             >
-              {pipelineRunning ? '⏹ 终止流水线' : '⚡ 一键 11 步流水线全量编排'}
+              {pipelineRunning ? (
+                <>
+                  <IconStopFill16 size={14} />
+                  <span>终止流水线</span>
+                </>
+              ) : (
+                <>
+                  <IconPlayOutline16 size={14} />
+                  <span>一键 11 步流水线全量编排</span>
+                </>
+              )}
             </button>
 
             <button
@@ -424,7 +416,8 @@ export function PmStudioWorkspace({
               disabled={runningStepId !== null}
               onClick={() => { handleRunSingleStep(activeTab) }}
             >
-              {runningStepId !== null && !pipelineRunning ? '正在推演本步...' : '单步重新生成'}
+              <IconRefreshOutline14 size={14} />
+              <span>{runningStepId !== null && !pipelineRunning ? '正在推演本步...' : '单步重新生成'}</span>
             </button>
           </div>
 
@@ -467,7 +460,8 @@ export function PmStudioWorkspace({
                   onClick={() => { setViewMode('preview') }}
                   title="富文本渲染视图"
                 >
-                  👁️ 渲染预览
+                  <IconBrowseOutline16 size={14} />
+                  <span>渲染预览</span>
                 </button>
                 <button
                   type="button"
@@ -475,12 +469,23 @@ export function PmStudioWorkspace({
                   onClick={() => { setViewMode('edit') }}
                   title="Markdown 源码手改视图"
                 >
-                  ✏️ 源码编辑 (手改)
+                  <IconEditOutline16 size={14} />
+                  <span>源码手改</span>
                 </button>
               </div>
 
               <button type="button" className={css.actionBtn} onClick={handleCopy}>
-                {copied ? '✓ 已复制！' : '复制当前规约'}
+                {copied ? (
+                  <>
+                    <IconCheckOutline14 size={13} />
+                    <span>已复制</span>
+                  </>
+                ) : (
+                  <>
+                    <IconCopyOutline16 size={13} />
+                    <span>复制规约</span>
+                  </>
+                )}
               </button>
               <button
                 type="button"
@@ -506,7 +511,7 @@ export function PmStudioWorkspace({
               ) : (
                 <div className={css.editorContainer}>
                   <div className={css.editorToolbar}>
-                    <span className={css.editorHint}>💡 实时手改模式：内容变更将自动保存至本工程</span>
+                    <span className={css.editorHint}>实时手改模式：内容变更将自动保存至本工程</span>
                     <span className={css.charCount}>{activeResult.length} 字符</span>
                   </div>
                   <textarea
@@ -538,119 +543,14 @@ export function PmStudioWorkspace({
       </div>
 
       {/* Modal for LLM Settings */}
-      {showLlmModal && (
-        <div className={css.modalBackdrop} onClick={() => { setShowLlmModal(false) }}>
-          <div className={css.modalCard} onClick={(e) => { e.stopPropagation() }}>
-            <h2 className={css.modalTitle}>⚙️ 大模型底座与服务配置</h2>
-
-            {/* Ambient DSH base status card */}
-            <div style={{
-              background: isBaseConnected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.04)',
-              border: `1px solid ${isBaseConnected ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-              borderRadius: '8px',
-              padding: '12px 14px',
-              marginBottom: '16px',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontWeight: 600, color: isBaseConnected ? '#34d399' : '#e2e8f0', fontSize: '13px' }}>
-                  {ambientLlm?.configured ? '🟢 DSH 底座大模型：已接入 (免配置模式生效中)' : '⚪ DSH 底座大模型：未在系统环境检测到 Key'}
-                </span>
-                {isCustomConnected && (
-                  <button
-                    type="button"
-                    onClick={handleRestoreBaseModel}
-                    style={{
-                      background: 'none',
-                      border: '1px solid #3b82f6',
-                      color: '#60a5fa',
-                      fontSize: '11px',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    恢复底座默认
-                  </button>
-                )}
-              </div>
-              <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8', lineHeight: '1.5' }}>
-                {ambientLlm?.configured
-                  ? `已自动继承底座配置：提供商 [${ambientLlm.provider}] · 模型 [${ambientLlm.model}] · 端点 [${ambientLlm.baseURL}]。无需在此重复输入 Key，编排流水线将直接使用底座大模型。`
-                  : '底座环境暂无凭据，您可以在下方手动指定自定义 API Key，或在系统环境变量中配置 DEEPSEEK_API_KEY。'}
-              </p>
-            </div>
-
-            <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '12px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '12px' }}>
-              <strong>自定义模型覆盖（高级可选）</strong>：如果您希望临时换用其他私有代理或特定模型进行测试，可在下方配置；留空则继续自动继承底座。
-            </div>
-
-            <form onSubmit={handleSaveLlmConfig} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div className={css.modalField}>
-                <label className={css.modalLabel} htmlFor="llmApiKey">自定义 API Key (可选覆盖)</label>
-                <input
-                  id="llmApiKey"
-                  className={css.modalInput}
-                  type="password"
-                  placeholder={ambientLlm?.configured ? '已继承底座 Key (如需覆盖才在此输入)' : 'sk-...'}
-                  value={modalApiKey}
-                  onChange={(e) => { setModalApiKey(e.target.value) }}
-                  autoFocus
-                />
-              </div>
-
-              <div className={css.modalField}>
-                <label className={css.modalLabel} htmlFor="llmBaseUrl">自定义 Base URL (可选覆盖)</label>
-                <input
-                  id="llmBaseUrl"
-                  className={css.modalInput}
-                  type="text"
-                  placeholder={ambientLlm?.baseURL || 'https://api.deepseek.com'}
-                  value={modalBaseUrl}
-                  onChange={(e) => { setModalBaseUrl(e.target.value) }}
-                />
-              </div>
-
-              <div className={css.modalField}>
-                <label className={css.modalLabel} htmlFor="llmModel">自定义模型名称 (可选覆盖)</label>
-                <input
-                  id="llmModel"
-                  className={css.modalInput}
-                  type="text"
-                  placeholder={ambientLlm?.model || 'deepseek-chat'}
-                  value={modalModel}
-                  onChange={(e) => { setModalModel(e.target.value) }}
-                />
-              </div>
-
-              <div className={css.modalActions}>
-                <button
-                  type="button"
-                  className={css.modalCancelBtn}
-                  onClick={() => { setShowLlmModal(false) }}
-                >
-                  关闭
-                </button>
-                {isCustomConnected && (
-                  <button
-                    type="button"
-                    className={css.modalCancelBtn}
-                    onClick={handleRestoreBaseModel}
-                    style={{ borderColor: 'rgba(239, 68, 68, 0.4)', color: '#f87171' }}
-                  >
-                    清除自定义覆盖
-                  </button>
-                )}
-                <button
-                  type="submit"
-                  className={css.modalConfirmBtn}
-                >
-                  保存配置
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <LlmSettingsModal
+        isOpen={showLlmModal}
+        onClose={() => { setShowLlmModal(false) }}
+        onConfigSaved={(cfg) => {
+          setEffectiveLlm(cfg)
+          notifyToast(`已切换至模型：${cfg.model} (${cfg.providerName || ''})`)
+        }}
+      />
     </div>
   )
 }

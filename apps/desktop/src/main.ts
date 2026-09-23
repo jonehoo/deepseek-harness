@@ -463,14 +463,60 @@ async function main(): Promise<void> {
       let baseURL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com'
       let apiKey = credentialsRefs.DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY || ''
 
-      const llmPiAi = settingsData['llm-pi-ai'] as { providers?: Record<string, { baseURL?: string; models?: Array<{ id?: string }>; apiKeyEnv?: string }> } | undefined
+      const availableProviders: Array<{
+        id: string
+        displayName: string
+        model: string
+        baseURL: string
+        apiKey: string
+        configured: boolean
+      }> = []
+
+      // 1. Official DeepSeek
+      const officialKey = (credentialsRefs.DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY || '').trim()
+      availableProviders.push({
+        id: 'deepseek-official',
+        displayName: 'DeepSeek 官方底座',
+        model: 'deepseek-chat',
+        baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
+        apiKey: officialKey,
+        configured: Boolean(officialKey),
+      })
+
+      // 2. Custom providers from settings.yaml (llm-pi-ai)
+      const llmPiAi = settingsData['llm-pi-ai'] as { providers?: Record<string, { displayName?: string; baseURL?: string; models?: Array<{ id?: string }>; apiKeyEnv?: string }> } | undefined
+      if (llmPiAi?.providers) {
+        for (const [pid, pcfg] of Object.entries(llmPiAi.providers)) {
+          const envName = pcfg.apiKeyEnv
+          const rawKey = envName ? credentialsRefs[envName] : undefined
+          const key = (typeof rawKey === 'string' ? rawKey : '').trim()
+          const pModel = pcfg.models?.[0]?.id || 'default'
+          const pBase = pcfg.baseURL || ''
+          const pName = pcfg.displayName || pid
+          availableProviders.push({
+            id: pid,
+            displayName: pName,
+            model: pModel,
+            baseURL: pBase,
+            apiKey: key,
+            configured: Boolean(pBase),
+          })
+        }
+      }
+
       if (provider !== 'deepseek-official' && llmPiAi?.providers?.[provider]) {
         const custom = llmPiAi.providers[provider]
         if (custom.baseURL) baseURL = custom.baseURL
         if (custom.models?.[0]?.id) model = custom.models[0].id
-        if (custom.apiKeyEnv && credentialsRefs[custom.apiKeyEnv]) {
-          apiKey = credentialsRefs[custom.apiKeyEnv] ?? ''
+        const customEnv = custom.apiKeyEnv
+        if (customEnv && credentialsRefs[customEnv]) {
+          apiKey = credentialsRefs[customEnv] ?? ''
         }
+      }
+
+      // If official DeepSeek endpoint, normalize deepseek-flash catalog ID to public chat model
+      if (baseURL.includes('api.deepseek.com') && model === 'deepseek-flash') {
+        model = 'deepseek-chat'
       }
 
       return {
@@ -479,6 +525,7 @@ async function main(): Promise<void> {
         model,
         baseURL,
         apiKey: apiKey.trim(),
+        availableProviders,
       }
     } catch (error) {
       console.warn('dsh desktop: failed to resolve ambient LLM config', error)

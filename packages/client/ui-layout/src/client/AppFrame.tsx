@@ -22,6 +22,7 @@ import type {
 import { computeColumns, RIGHTBAR_DEFAULT_RATIO, SIDEBAR_AUTO_COLLAPSE, SIDEBAR_COLLAPSED, SIDEBAR_DEFAULT } from './columns.ts'
 import { DocumentTitle } from './DocumentTitle.tsx'
 import type { createLayoutStore } from './stores.ts'
+import { IconUserOutline16 } from '@deepseek-ai/dsh-client-ui-primitives'
 import { OpcPortalShell } from './portal/OpcPortalShell.tsx'
 import css from './AppFrame.module.css'
 
@@ -230,7 +231,7 @@ export function AppFrame({
     } else if (taskSpec) {
       setActiveWorker(null)
       void navigator.clipboard.writeText(taskSpec).catch(() => {})
-      setBridgeNotice('✓ 已将 PM 蓝图规约复制至剪贴板，可直接在下方输入框 Ctrl+V 发送！')
+      setBridgeNotice('已将 PM 蓝图规约复制至剪贴板，可直接在下方输入框 Ctrl+V 发送！')
     } else {
       setActiveWorker(null)
       setBridgeNotice(null)
@@ -239,7 +240,16 @@ export function AppFrame({
   }, [setAppMode])
 
   if (appMode === 'portal') {
-    return <OpcPortalShell onOpenDsh={handleOpenDsh} />
+    return (
+      <>
+        <DocumentTitle
+          productTitle={productTitle}
+          useSessions={useSessions}
+          usePanelInfo={usePanelInfo}
+        />
+        <OpcPortalShell onOpenDsh={handleOpenDsh} />
+      </>
+    )
   }
 
   return (
@@ -283,13 +293,17 @@ export function AppFrame({
               <span>OPC 指挥中枢 · 底座会话</span>
               {activeWorker && (
                 <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
                   padding: '2px 8px',
                   background: '#dbeafe',
                   color: '#1d4ed8',
                   borderRadius: '4px',
                   fontWeight: 700,
                 }}>
-                  👨‍💼 正在与【{activeWorker.name} · {activeWorker.roleTitle}】协同
+                  <IconUserOutline16 size={13} />
+                  <span>正在与【{activeWorker.name} · {activeWorker.roleTitle}】协同</span>
                 </span>
               )}
               {bridgeNotice && !activeWorker && (

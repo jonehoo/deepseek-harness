@@ -2,187 +2,532 @@
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 540px;
+  min-height: 560px;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(37, 99, 235, 0.16);
-  border-radius: 8px;
-  background:
-    linear-gradient(90deg, rgba(47, 109, 246, 0.04) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(47, 109, 246, 0.04) 1px, transparent 1px),
-    radial-gradient(circle at 50% 43%, rgba(8, 145, 178, 0.12), transparent 28%),
-    radial-gradient(circle at 50% 45%, rgba(37, 99, 235, 0.08), transparent 46%),
-    linear-gradient(180deg, #fcfdff 0%, #f4f8fe 100%);
+  background-color: #f8fafc;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.045) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 60% at 50% 48%, rgba(59, 130, 246, 0.15) 0%, rgba(14, 165, 233, 0.05) 45%, transparent 75%),
+    linear-gradient(180deg, #fbfdff 0%, #f1f5f9 100%);
   background-size:
-    28px 28px,
-    28px 28px,
-    100% 100%,
+    30px 30px,
+    30px 30px,
     100% 100%,
     100% 100%;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 12px 36px rgba(37, 99, 235, 0.06);
   overflow: hidden;
   user-select: none;
 }
 
+/* Technical Corner Markers */
+.techMarker {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.45;
+}
+
+.techMarkerTL {
+  top: 10px;
+  left: 10px;
+  border-top: 2px solid #2563eb;
+  border-left: 2px solid #2563eb;
+}
+
+.techMarkerTR {
+  top: 10px;
+  right: 10px;
+  border-top: 2px solid #2563eb;
+  border-right: 2px solid #2563eb;
+}
+
+.techMarkerBL {
+  bottom: 10px;
+  left: 10px;
+  border-bottom: 2px solid #2563eb;
+  border-left: 2px solid #2563eb;
+}
+
+.techMarkerBR {
+  bottom: 10px;
+  right: 10px;
+  border-bottom: 2px solid #2563eb;
+  border-right: 2px solid #2563eb;
+}
+
+/* Header */
 .stageHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
-  z-index: 4;
+  padding: 16px 28px 8px;
+  z-index: 6;
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .stageTitle {
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 800;
-  color: #1e293b;
-  letter-spacing: 0.02em;
+  color: #0f172a;
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
-.stageSubtitle {
-  font-size: 11px;
-  color: #64748b;
-  font-weight: 500;
-  padding: 4px 12px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(203, 213, 225, 0.6);
+.stageLiveTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: rgba(239, 246, 255, 0.9);
+  border: 1px solid rgba(191, 219, 254, 0.8);
   border-radius: 20px;
-  letter-spacing: 0.04em;
+  font-size: 11px;
+  font-weight: 600;
+  color: #2563eb;
+  letter-spacing: 0.02em;
 }
 
+.liveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulseDot 2.4s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+}
+
+.stageSubtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #475569;
+  font-weight: 600;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 20px;
+  letter-spacing: 0.03em;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.headerIcon {
+  color: #2563eb;
+}
+
+/* Stage Body */
 .stageBody {
   position: relative;
   flex: 1;
   width: 100%;
+  height: 100%;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 0;
 }
 
-/* Left & Right Info Panels */
+/* Left & Right HUD Glassmorphism Panels */
 .infoPanel {
   position: absolute;
-  top: 48%;
+  top: 50%;
   transform: translateY(-50%);
-  z-index: 3;
-  width: 290px;
-  padding: 18px 20px;
-  border: 1px solid rgba(147, 197, 253, 0.65);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 14px 32px rgba(37, 99, 235, 0.08);
-  backdrop-filter: blur(14px);
-  transition: all 0.25s ease;
+  z-index: 4;
+  width: 320px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow:
+    0 20px 40px -12px rgba(15, 23, 42, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+.infoPanel:hover {
+  transform: translateY(calc(-50% - 2px));
+  box-shadow:
+    0 24px 48px -12px rgba(37, 99, 235, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 .infoPanelLeft {
-  left: 32px;
+  left: 36px;
 }
 
 .infoPanelRight {
-  right: 32px;
+  right: 36px;
+}
+
+.panelHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .infoEyebrow {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: #2563eb;
   font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  margin-bottom: 4px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.eyebrowIcon {
+  color: #2563eb;
+}
+
+.modeBadge,
+.levelCountBadge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #0369a1;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 2px 8px;
 }
 
 .infoTitle {
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
   color: #0f172a;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .infoDescription {
-  margin: 0;
+  margin: 0 0 14px 0;
   color: #475569;
   font-size: 12px;
   line-height: 1.65;
 }
 
+/* Command Prompt Quote Box */
 .commandExample {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.7) 0%, rgba(240, 249, 255, 0.9) 100%);
+  border: 1px solid rgba(191, 219, 254, 0.85);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.commandExample:hover {
+  background: linear-gradient(135deg, rgba(219, 234, 254, 0.8) 0%, rgba(224, 242, 254, 0.95) 100%);
+  border-color: #60a5fa;
+  transform: translateY(-1px);
+}
+
+.commandExampleHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.commandIconWrap {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: #2563eb;
+  color: #ffffff;
   display: grid;
-  gap: 4px;
-  margin-top: 14px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  place-items: center;
 }
 
 .commandExampleLabel {
-  color: #2563eb;
   font-size: 10px;
   font-weight: 700;
+  color: #1d4ed8;
+  flex: 1;
 }
 
-.commandExampleText {
-  color: #334155;
-  font-size: 11px;
+.commandQuickAction {
+  font-size: 10px;
+  font-weight: 700;
+  color: #2563eb;
+  opacity: 0.85;
+}
+
+.commandExampleBubble {
+  font-size: 12px;
   font-weight: 600;
-  line-height: 1.5;
+  color: #1e293b;
+  line-height: 1.45;
+  font-style: italic;
 }
 
+.panelFooterNote {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.checkIcon {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+/* Capability List */
 .capabilityList {
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .capabilityItem {
-  display: grid;
-  grid-template-columns: 26px minmax(0, 1fr);
-  gap: 8px;
-  align-items: center;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .capabilityBadge {
   display: grid;
   place-items: center;
-  height: 20px;
+  width: 26px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.capabilityBadgeL1 {
   background: #eff6ff;
   border: 1px solid #bfdbfe;
-  border-radius: 4px;
   color: #2563eb;
-  font-size: 10px;
-  font-weight: 700;
 }
 
-.capabilityText {
-  color: #475569;
+.capabilityBadgeL2 {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
+}
+
+.capabilityBadgeL3 {
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+  color: #9333ea;
+}
+
+.capabilityDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.capabilityLevelName {
   font-size: 11px;
-  line-height: 1.5;
+  font-weight: 700;
+  color: #334155;
 }
 
-/* Center Avatar Stage */
+.capabilityTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.capabilityTag {
+  display: inline-block;
+  padding: 2px 7px;
+  background: rgba(241, 245, 249, 0.8);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 4px;
+  font-size: 11px;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.panelFooterTelemetry {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  font-size: 10.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.telemetryItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.telemetryDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #3b82f6;
+  box-shadow: 0 0 5px #3b82f6;
+}
+
+/* =========================================================
+   Center Hero Avatar Stage (Perfect Vertical & Horizontal Centering)
+   ========================================================= */
 .avatarStage {
   position: absolute;
   inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 24px;
+  justify-content: center;
   z-index: 2;
-  perspective: 1000px;
+  perspective: 1100px;
+  pointer-events: none;
 }
 
+.avatarHeroUnit {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  margin-top: -12px;
+}
+
+/* Holographic Projection Pedestal beneath avatar feet */
+.holoPodium {
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 380px;
+  height: 160px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.holoVerticalBeam {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  height: 240px;
+  background: linear-gradient(to top, rgba(59, 130, 246, 0.16) 0%, rgba(56, 189, 248, 0.04) 50%, transparent 100%);
+  clip-path: polygon(15% 100%, 85% 100%, 100% 0%, 0% 0%);
+  filter: blur(8px);
+  animation: beamPulse 4.8s infinite ease-in-out;
+}
+
+@keyframes beamPulse {
+  0%, 100% { opacity: 0.7; transform: translateX(-50%) scaleY(1); }
+  50% { opacity: 1; transform: translateX(-50%) scaleY(1.08); }
+}
+
+.holoSpotlight {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 340px;
+  height: 110px;
+  background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.35) 0%, rgba(37, 99, 235, 0.12) 50%, transparent 75%);
+  filter: blur(10px);
+}
+
+.holoRings {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) rotateX(68deg);
+  width: 360px;
+  height: 140px;
+  display: grid;
+  place-items: center;
+}
+
+.holoRingOuter {
+  position: absolute;
+  width: 340px;
+  height: 130px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(59, 130, 246, 0.55);
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.3);
+  animation: rotateOuterRing 20s linear infinite;
+}
+
+@keyframes rotateOuterRing {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.holoRingMiddle {
+  position: absolute;
+  width: 250px;
+  height: 96px;
+  border-radius: 50%;
+  border: 1px solid rgba(56, 189, 248, 0.75);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.45);
+  animation: pulseMiddleRing 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulseMiddleRing {
+  0% { transform: scale(0.96); opacity: 0.7; }
+  100% { transform: scale(1.04); opacity: 1; }
+}
+
+.holoRingInner {
+  position: absolute;
+  width: 150px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(56, 189, 248, 0.4) 0%, rgba(37, 99, 235, 0.1) 70%, transparent 100%);
+  border: 1px solid rgba(147, 197, 253, 0.8);
+}
+
+/* Avatar Parallax Frame */
 .avatarParallax {
   position: relative;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  width: 320px;
-  height: 340px;
+  width: clamp(340px, 30vw, 420px);
+  height: clamp(380px, 47vh, 480px);
   transform-style: preserve-3d;
   transition: transform 0.15s cubic-bezier(0.2, 0, 0.2, 1);
+  z-index: 3;
 }
 
 .avatarImage {
@@ -190,77 +535,143 @@
   height: 100%;
   object-fit: contain;
   object-position: center bottom;
-  filter: drop-shadow(0 14px 18px rgba(15, 23, 42, 0.14)) drop-shadow(0 0 16px rgba(37, 99, 235, 0.1));
-  animation: floatAnim 4.6s ease-in-out infinite;
+  filter:
+    drop-shadow(0 16px 24px rgba(15, 23, 42, 0.18))
+    drop-shadow(0 0 24px rgba(59, 130, 246, 0.22));
+  animation: floatAvatar 4.8s ease-in-out infinite;
 }
 
-@keyframes floatAnim {
+@keyframes floatAvatar {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-7px); }
+}
+
+/* Identity & Action Block */
+.avatarIdentityBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  z-index: 4;
+}
+
+.workerStatusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(187, 247, 208, 0.9);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #15803d;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.statusPillDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
 }
 
 .avatarCopy {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  margin-top: 4px;
-  margin-bottom: 12px;
-  z-index: 3;
+  gap: 3px;
+  text-align: center;
+  margin: 4px 0 10px;
 }
 
 .avatarName {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 800;
   color: #0f172a;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .avatarRole {
-  font-size: 12px;
+  font-size: 12.5px;
   color: #64748b;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .actionButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 9px 36px;
-  background: #2563eb;
+  gap: 8px;
+  padding: 10px 32px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: #ffffff;
-  border: 1px solid #1d4ed8;
-  border-radius: 6px;
-  font-size: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 30px;
+  font-size: 13.5px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
-  transition: all 0.2s ease;
-  z-index: 3;
+  box-shadow:
+    0 8px 24px -4px rgba(37, 99, 235, 0.45),
+    0 2px 6px rgba(37, 99, 235, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.actionButtonIcon {
+  display: grid;
+  place-items: center;
 }
 
 .actionButton:hover {
-  background: #1d4ed8;
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  box-shadow:
+    0 12px 30px -4px rgba(37, 99, 235, 0.55),
+    0 4px 10px rgba(37, 99, 235, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transform: translateY(-2px) scale(1.02);
 }
 
 .actionButton:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.99);
 }
 
-/* Bottom Roster Strip */
+/* =========================================================
+   Bottom Floating Cyber Dock
+   ========================================================= */
 .rosterStrip {
+  position: absolute;
+  bottom: 18px;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.92);
-  border-top: 1px solid rgba(226, 232, 240, 0.8);
-  backdrop-filter: blur(8px);
-  z-index: 4;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.rosterDock {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 9999px;
+  box-shadow:
+    0 16px 36px -8px rgba(15, 23, 42, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  max-width: 95vw;
   overflow-x: auto;
 }
 
@@ -268,27 +679,59 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 7px 14px;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 9999px;
   color: #475569;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.18s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .rosterItem:hover {
-  background: rgba(239, 246, 255, 0.8);
+  background: rgba(239, 246, 255, 0.85);
   color: #2563eb;
 }
 
 .rosterItemActive {
-  background: #eff6ff !important;
-  border-color: #93c5fd !important;
-  color: #1d4ed8 !important;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
   font-weight: 700 !important;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
+  box-shadow:
+    0 4px 14px rgba(37, 99, 235, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.rosterItemName {
+  display: inline-block;
+}
+
+.rosterActiveDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+}
+
+/* Responsive constraints */
+@media (max-width: 1200px) {
+  .infoPanel {
+    width: 270px;
+    padding: 16px;
+  }
+  .infoPanelLeft {
+    left: 20px;
+  }
+  .infoPanelRight {
+    right: 20px;
+  }
+  .avatarParallax {
+    width: 320px;
+    height: 380px;
+  }
 }

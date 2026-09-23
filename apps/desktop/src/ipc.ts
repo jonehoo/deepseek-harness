@@ -16,6 +16,15 @@ export const DESKTOP_IPC = {
   ambientLlm: 'dsh-desktop:ambient-llm',
 } as const
 
+export interface AmbientProviderItem {
+  readonly id: string
+  readonly displayName: string
+  readonly model: string
+  readonly baseURL: string
+  readonly apiKey: string
+  readonly configured: boolean
+}
+
 /** Ambient LLM configuration resolved from the DSH base environment. */
 export interface AmbientLlmConfig {
   readonly configured: boolean
@@ -23,6 +32,7 @@ export interface AmbientLlmConfig {
   readonly model: string
   readonly baseURL: string
   readonly apiKey: string
+  readonly availableProviders?: readonly AmbientProviderItem[]
 }
 
 /** Desktop release update state rendered by desktop-owned UI. */

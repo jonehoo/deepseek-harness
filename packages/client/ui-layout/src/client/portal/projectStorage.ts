@@ -3,6 +3,15 @@
  * Allows creating, editing, auto-saving and switching between enterprise blueprint designs.
  */
 import { STEPS_CONFIG } from './pmPrompts.ts'
+import { TRAINER_STEPS_CONFIG } from './trainerPrompts.ts'
+
+export interface TrainerMeta {
+  title: string
+  industry: string
+  targetAudience: string
+  durationMinutes: number
+  stylePreset: string
+}
 
 export interface BlueprintProject {
   id: string
@@ -15,6 +24,10 @@ export interface BlueprintProject {
   isRagEnabled: boolean
   selectedKb: string
   stepResults: Record<string, string>
+  // Training Studio courseware fields
+  trainerMeta?: TrainerMeta
+  trainerPromptText?: string
+  trainerStepResults?: Record<string, string>
 }
 
 const STORAGE_KEY = 'dsh_opc_blueprint_projects'
@@ -248,6 +261,23 @@ export function exportFullBlueprintMarkdown(project: BlueprintProject): string {
   const body = STEPS_CONFIG.map((step) => {
     const content = project.stepResults[step.id.toString()] || '*(该步骤尚未生成规约产物)*'
     return `## 【第 ${step.id} 步 · 规约】${step.title}\n\n${content}\n\n---\n`
+  }).join('\n')
+  return header + body
+}
+
+export function exportFullTrainerCoursewareMarkdown(project: BlueprintProject): string {
+  const meta = project.trainerMeta || {
+    title: `${project.name}实操认证培训`,
+    industry: '汽车工业 / 智能制造',
+    targetAudience: '车间班组长、工艺工程师、工控协调员',
+    durationMinutes: 120,
+    stylePreset: '科技蓝',
+  }
+  const header = `# 【企业合规与数字化赋能培训全案】\n\n- **课程主题**：${meta.title}\n- **所属行业**：${meta.industry}\n- **目标受众**：${meta.targetAudience}\n- **建议课时**：${meta.durationMinutes} 分钟\n- **设计角色**：OPC 流程合规培训师\n- **最新修订**：${project.updatedAt}\n\n---\n\n`
+  const results = project.trainerStepResults || {}
+  const body = TRAINER_STEPS_CONFIG.map((step) => {
+    const content = results[step.id] || '*(该工序尚未生成交付产物)*'
+    return `## 【${step.num}】${step.title}（${step.phase}）\n\n> 阶段目标：${step.description}\n\n${content}\n\n---\n`
   }).join('\n')
   return header + body
 }
